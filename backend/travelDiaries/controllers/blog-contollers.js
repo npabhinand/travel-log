@@ -29,6 +29,16 @@ export const addBlog = async (req, res) => {
   ) {
     return res.status(422).json({ message: "invalid data" });
   }
+
+  let existingUser;
+  try{
+    existingUser=await User.findById(user);
+  }catch(err){
+    console.log(err)
+  }
+  if (!existingUser){
+    return res.status(404).json({message:"User not found"})
+  }
   let blog;
   try {
     blog = new Blog({
@@ -39,7 +49,14 @@ export const addBlog = async (req, res) => {
       date: new Date(`${date}`),
       user,
     });
-    await blog.save();
+    const session=mongoose.startSession();
+    session.startTransaction();
+
+    existingUser.blogs.push(blog);
+    await existingUser.save({session});
+
+    blog=await blog.save({session});
+    session.commitTransaction();
   } catch (err) {
     return console.log(err);
   }
