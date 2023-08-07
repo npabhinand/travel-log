@@ -14,7 +14,7 @@ import EditOutlinedIcon from '@mui/icons-material/EditOutlined';
 import DeleteOutlineOutlinedIcon from '@mui/icons-material/DeleteOutlineOutlined';
 // import { red } from '@mui/material/colors';
 
-export const BlogItem = () => {
+export const BlogItem = ({title,description,image,location,date,id  }) => {
   return (
     <Card
       sx={{
@@ -36,14 +36,15 @@ export const BlogItem = () => {
             <EditLocationAltIcon />
           </IconButton>
         }
-        title="Shrimp and Chorizo Paella"
-        subheader="September 14, 2016"
+        title={title}
+        header={location}
+        subheader={date}
       />
       <img
         width={"100%"}
         height={"50%"}
-        src="./travel.jpeg"
-        alt="Paella dish"
+        src={image}
+        alt={title}
         justifyContent="center"
       />
       <CardContent>
@@ -53,7 +54,7 @@ export const BlogItem = () => {
           color="text.secondary"
           justifyContent={"center"}
         >
-          This impressive paella
+        {title}
         </Typography>
         <hr />
         <Box paddingTop={1} display={"flex"}>
@@ -61,9 +62,7 @@ export const BlogItem = () => {
             Abhinand Naryanan:
           </Typography>
           <Typography variant="body2" color="text.secondary">
-            This impressive paella is a perfect party dish and a fun meal to
-            cook together with your guests. Add 1 cup of frozen peas along with
-            the mussels, if you like.
+            {description}
           </Typography>
         </Box>
       </CardContent>

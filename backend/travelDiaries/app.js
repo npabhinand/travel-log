@@ -3,13 +3,13 @@ import mongoose from "mongoose";
 import dotenv from "dotenv";
 import blogRouter from "./routing/Blog-routes.js";
 import userRouter from "./routing/User-routes.js"; // Correct the path here
-
+import cors from "cors"
 const app = express();
 dotenv.config();
 
 // Add this middleware to parse JSON in the request body
+app.use(cors())
 app.use(express.json());
-
 app.use("/user", userRouter);
 app.use("/blogs", blogRouter);
 
