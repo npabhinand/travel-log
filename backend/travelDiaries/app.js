@@ -8,10 +8,8 @@ const app = express();
 dotenv.config();
 
 // Add this middleware to parse JSON in the request body
-app.use(cors())
+app.use(cors());
 app.use(express.json());
-app.use("/user", userRouter);
-app.use("/blogs", blogRouter);
 
 // Rest of your code...
 
@@ -20,7 +18,13 @@ mongoose
   .then(() => app.listen(5000, () => console.log("connection successful")))
   .catch((err) => console.log(err));
 
+// User routes
 app.use("/user", userRouter);
+
+// Blog routes
+app.use("/blogs", blogRouter);
+
+// Default route
 app.use("/", (req, res, next) => {
   res.send("hai");
 });

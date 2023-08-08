@@ -1,28 +1,46 @@
-import { FormLabel, TextField, Typography, Box, Button } from "@mui/material";
+import {  TextField, Typography, Box, Button } from "@mui/material";
 import React, { useState } from "react";
 import { SendAuthRequest } from "../api-helpers/helps";
-import {useDispatch} from "react-redux"
+import { useDispatch } from "react-redux";
 import { authActions } from "../store";
 
 export const Auth = () => {
-  const dispatch=useDispatch();
+  const dispatch = useDispatch();
   const [isSignup, setIsSignup] = useState(true);
+ 
   const handleSubmit = (e) => {
     e.preventDefault();
     console.log(inputs);
+  
     if (isSignup) {
       SendAuthRequest(true, inputs)
-        .then((data) =>localStorage.setItem("userId",data.user._id))
-        .then(()=>{dispatch(authActions.login())})
+        .then((data) => {
+          console.log("Response data:", data);
+          if (data && data.id) {
+            localStorage.setItem("userId", data.id);
+            dispatch(authActions.login());
+          } else {
+            console.log("Authentication failed.");
+          }
+        })
         .catch((err) => console.log(err));
     } else {
       SendAuthRequest(false, inputs)
-        .then((data) =>localStorage.setItem("userId",data.id))
-        .then(()=>{dispatch(authActions.login())})  
+        .then((data) => {
+          console.log("Response data:", data);
+          if (data && data.id) {
+            localStorage.setItem("userId", data.id);
+            dispatch(authActions.login());
+          } else {
+            console.log("Authentication failed.");
+          }
+        })
         .catch((err) => console.log(err));
     }
   };
   
+  
+
   const [inputs, setInputs] = useState({ name: "", email: "", password: "" });
   const handleChange = (e) => {
     setInputs((prevState) => ({
@@ -31,69 +49,64 @@ export const Auth = () => {
     }));
   };
   return (
-    <Box
-      width="40%"
-      borderRadius={10}
-      boxShadow={"5px 5px 10px #ccc"}
-      margin="auto"
-      marginTop={20}
-    >
+    <div>
       <form onSubmit={handleSubmit}>
         <Box
+          maxWidth={400}
           display="flex"
           flexDirection={"column"}
-          width="60%"
-          padding={5}
+          alignItems="center"
+          justifyContent={"center"}
+          boxShadow="10px 10px 20px #ccc"
+          padding={3}
           margin="auto"
+          marginTop={10}
+          borderRadius={5}
         >
-          <Typography padding={1} variant="h4" textAlign={"center"}>
+          <Typography variant="h2" padding={3} textAlign="center">
             {isSignup ? "Signup" : "Login"}
           </Typography>
           {isSignup && (
-            <>
-              <FormLabel>Name</FormLabel>
-              <TextField
-                value={inputs.name}
-                name="name"
-                onChange={handleChange}
-                required
-                margin="normal"
-              />
-            </>
-          )}
-
-          <FormLabel>Email</FormLabel>
+            <TextField
+              name="name"
+              onChange={handleChange}
+              value={inputs.name}
+              placeholder="Name"
+              margin="normal"
+            />
+          )}{" "}
           <TextField
-            value={inputs.email}
-            required
-            margin="normal"
             name="email"
             onChange={handleChange}
-          />
-          <FormLabel>Password</FormLabel>
-          <TextField
+            value={inputs.email}
+            type={"email"}
+            placeholder="Email"
             margin="normal"
-            value={inputs.password}
-            required
+          />
+          <TextField
             name="password"
             onChange={handleChange}
+            value={inputs.password}
+            type={"password"}
+            placeholder="Password"
+            margin="normal"
           />
           <Button
             type="submit"
             variant="contained"
-            sx={{ mt: 2, borderRadius: 10 }}
+            sx={{ borderRadius: 3, marginTop: 3 }}
+            color="warning"
           >
-            {isSignup ? "Signup" : "Login"}
+            Submit
           </Button>
           <Button
-            type="submit"
-            variant="outlined"
-            sx={{ mt: 2, borderRadius: 10 }}
+            onClick={() => setIsSignup(!isSignup)}
+            sx={{ borderRadius: 3, marginTop: 3 }}
           >
-            {isSignup ? "Login" : "Signup"}
+            Change To {isSignup ? "Login" : "Signup"}
           </Button>
         </Box>
       </form>
-    </Box>
+    </div>
   );
 };

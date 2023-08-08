@@ -1,4 +1,6 @@
 import Blog from "../models/Blog.js";
+import User from '../models/User.js';
+import mongoose from "mongoose";
 
 export const getAllBlogs = async (req, res, next) => {
   let blogs;
@@ -16,16 +18,16 @@ export const getAllBlogs = async (req, res, next) => {
 export const addBlog = async (req, res) => {
   const { title, description, image, location, date, user } = req.body;
   if (
-    !title &&
-    title.trim === "" &&
-    !description &&
-    description.trim === "" &&
-    !location &&
-    !location.trim === "" &&
-    !date &&
-    !user &&
-    !image &&
-    image.trim === ""
+    !title ||
+    title.trim() === "" ||
+    !description ||
+    description.trim() === "" ||
+    !location ||
+    location.trim() === "" ||
+    !date ||
+    !user ||
+    !image ||
+    image.trim() === ""
   ) {
     return res.status(422).json({ message: "invalid data" });
   }
@@ -35,36 +37,48 @@ export const addBlog = async (req, res) => {
     existingUser = await User.findById(user);
   } catch (err) {
     console.log(err);
+    return res.status(500).json({ message: "Unexpected error occurred" });
   }
+
   if (!existingUser) {
     return res.status(404).json({ message: "User not found" });
   }
+
   let blog;
+  const session = await mongoose.startSession();
+
   try {
+    session.startTransaction();
+
     blog = new Blog({
       title,
       description,
       image,
       location,
-      date: new Date(`${date}`),
+      date: new Date(date),
       user,
     });
-    const session = mongoose.startSession();
-    session.startTransaction();
 
+    // Check if existingUser.blogs exists before pushing the blog
+    existingUser.blogs = existingUser.blogs || [];
     existingUser.blogs.push(blog);
+
     await existingUser.save({ session });
 
     blog = await blog.save({ session });
-    session.commitTransaction();
+
+    await session.commitTransaction();
+    session.endSession();
   } catch (err) {
-    return console.log(err);
+    console.log(err);
+    await session.abortTransaction();
+    session.endSession();
+    return res.status(500).json({ message: "Unexpected error occurred" });
   }
-  if (!blog) {
-    return res.status(500).json({ message: "unexpected error occured" });
-  }
+
   return res.status(201).json({ blog });
 };
+
 
 export const getBlogById = async (req, res) => {
   const id = req.params.id;
@@ -82,7 +96,7 @@ export const getBlogById = async (req, res) => {
 
 export const updateBlog = async (req, res) => {
   const id = req.params.id;
-  const { title, description, image, location, date, user } = req.body;
+  const { title, description, image, location, user } = req.body;
   if (
     !title &&
     title.trim === "" &&
@@ -90,7 +104,6 @@ export const updateBlog = async (req, res) => {
     description.trim === "" &&
     !location &&
     !location.trim === "" &&
-    !date &&
     !user &&
     !image &&
     image.trim === ""
@@ -103,7 +116,6 @@ export const updateBlog = async (req, res) => {
       title,
       description,
       image,
-      date: new Date(`${date}`),
       location,
     });
   } catch (err) {
@@ -115,22 +127,32 @@ export const updateBlog = async (req, res) => {
   return res.status(200).json({ message: "Updated Successfully" });
 };
 
-export const deleteBlog = async (req, res) => {
+export const deleteBlog = async (req, res, next) => {
   const id = req.params.id;
-  let blog;
+
   try {
-    const session=await mongoose.startSession();
-    session.startTransaction();
-    blog=await Blog.findById(id).populate("user");
-    blog.user.blogs.pull(blog);
-    await blog.user.save({session});
-    blog = await Blog.findByIdAndRemove(id);
-    session.commitTransaction();
+    // Populate the user before deletion
+    const blog = await Blog.findById(id).populate("user");
+
+    if (!blog) {
+      return res.status(404).json({ message: "Blog not found" });
+    }
+
+    if (blog && blog.user && blog.user.blogs) {
+      // Access the user's blogs property and remove the blog
+      blog.user.blogs.pull(blog);
+      await blog.user.save();
+    }
+
+    // Delete the blog
+    await Blog.findByIdAndRemove(id);
+    
+    return res.status(200).json({ message: "Successfully deleted" });
   } catch (err) {
     console.log(err);
+    return res.status(500).json({ message: "Internal Server Error" });
   }
-  if (!blog) {
-    return res.status(500).json({ message: "Unable to delete" });
-  }
-  return res.status(200).json({ message: "Deleted Successfully" });
 };
+
+
+ 
