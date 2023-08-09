@@ -1,46 +1,30 @@
-import React,{useState} from "react";
-import {
-  Card,
-  Avatar,
-  IconButton,
-  CardHeader,
-  CardContent,
-  Typography,
-  Box,
-  CardActions,
-  Alert,
-  Snackbar,
-} from "@mui/material";
-import EditLocationAltIcon from "@mui/icons-material/EditLocationAlt";
+import { Box,Card,CardHeader,Avatar,IconButton,Typography 
+,CardActions,CardContent,Snackbar,Alert} from "@mui/material";
+import React, {useState } from "react";
 import EditOutlinedIcon from "@mui/icons-material/EditOutlined";
 import DeleteOutlineOutlinedIcon from "@mui/icons-material/DeleteOutlineOutlined";
 import { Link } from "react-router-dom";
 import { blogDelete } from "../api-helpers/helps";
-// import { red } from '@mui/material/colors';
+import EditLocationAltIcon from '@mui/icons-material/EditLocationAlt';
 
-export const BlogItem = ({ title, description, image, location, date, id,user }) => {
+export const BlogItem = ({ title, description, image, location, date, id, user }) => {
+  const [open, setOpen] = useState(false);
 
-  const [open, setOpen] = useState(false)
   const isLoggedInUser = () => {
-    if (localStorage.getItem("userId") === id) {
-      return true;
-    }
-    else{
-      return false;
-    }
-    
+    return localStorage.getItem("userId") === user;
   };
 
-  const handleDelete=()=>{
+  const handleDelete = () => {
     blogDelete(id)
-    .then((data)=>console.log(data))
-    .catch((err)=>console.log(err));
+      .then((data) => console.log(data))
+      .catch((err) => console.log(err));
     setOpen(true);
-  }
+  };
+
   return (
     <Card
       sx={{
-        Width: "50%",
+        width: "50%",
         height: "60vh",
         margin: 1,
         padding: 1,

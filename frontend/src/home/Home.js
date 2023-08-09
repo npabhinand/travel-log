@@ -27,13 +27,13 @@ export const Home = () => {
       <Box width="100%"  display="flex" flexDirection={"column"}>
         <Typography textAlign={'center'} variant="h4" padding={4}
         fontFamily={"Quicksand"}>
-          SHARE YOUR TRAVEL DIARIES WITH US
+          SHARE YOUR TRAVEL EXPERIENCE WITH US
         </Typography>
         <Box margin={"auto"}>
           <Button variant="outlined" sx={{mr:2}}>
-            Share Your Diaries
+            Share Your TRAVEL BLOGS
           </Button>
-          <Button variant="contained" LinkComponent={Link} to="/blogs" sx={{ml:2}}>View Diaries</Button>
+          <Button variant="contained" LinkComponent={Link} to="/blogs" sx={{ml:2}}>VIEW BLOGS</Button>
         </Box>
       </Box>
     </div>

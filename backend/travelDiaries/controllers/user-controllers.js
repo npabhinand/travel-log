@@ -77,17 +77,16 @@ export const login = async (req, res, next) => {
 };
 
 
-
 export const getUserById = async (req, res) => {
   const id = req.params.id;
-  let user;
   try {
-    user =await User.findById(id).populate("blogs");
+    const user = await User.findById(id).populate("blogs");
+    if (!user) {
+      return res.status(404).json({ message: "No User found" });
+    }
+    return res.status(200).json({ user });
   } catch (err) {
-    return console.log(err)
+    console.error("Error in getUserById:", err);
+    return res.status(500).json({ message: "Unexpected error occurred" });
   }
-  if(!user){
-    return res.status(404).json({message:"No User found"})
-  }
-  return res.status(200).json({user})
-}
+};
